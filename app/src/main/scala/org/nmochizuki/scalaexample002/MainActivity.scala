@@ -39,7 +39,7 @@ class MainActivity extends AppCompatActivity {
     Log.d(TAG, "onCreate")
     setContentView(R.layout.activity_main)
 
-    requestPermissions
+    requestPermissions()
 
     val playButton = findViewById(R.id.button_play).asInstanceOf[Button]
     playButton.setOnClickListener(new OnClickListener {
@@ -57,9 +57,9 @@ class MainActivity extends AppCompatActivity {
     bindService(intent, connection, Context.BIND_AUTO_CREATE)
   }
 
-  def requestPermissions: Unit = {
-    val permitRecord  = ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO);
-    val permitStorage = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+  private def requestPermissions(): Unit = {
+    val permitRecord  = ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
+    val permitStorage = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
     if (permitRecord != PackageManager.PERMISSION_GRANTED
         || permitStorage != PackageManager.PERMISSION_GRANTED) {
       if (shouldShowRequestPermissionRationale(Manifest.permission.CAMERA)) {

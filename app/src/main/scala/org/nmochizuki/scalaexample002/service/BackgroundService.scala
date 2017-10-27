@@ -9,7 +9,6 @@ class BackgroundService(name: String) extends IntentServiceWrapper(name: String)
   private val TAG = "BackgroundService"
 
   @volatile private var allowBind = false
-  @volatile private var num = 0
 
   def this() = {
     this("BackgroundService")
@@ -51,6 +50,6 @@ object BackgroundService {
   private val binder = new LocalBinder
 
   class LocalBinder extends Binder {
-    def service = self.apply
+    def service: BackgroundService = self.apply
   }
 }
