@@ -2,7 +2,7 @@ package org.nmochizuki.scalaexample002
 
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
-import android.content.Context
+import android.content.{Context, Intent}
 import android.util.Log
 import android.widget.RemoteViews
 
@@ -18,7 +18,6 @@ class NewAppWidget extends AppWidgetProvider {
     val widgetText: CharSequence = context.getString(R.string.appwidget_text)
     // Construct the RemoteViews object
     val views: RemoteViews = new RemoteViews(context.getPackageName, R.layout.new_app_widget)
-    views.setTextViewText(R.id.appwidget_text, widgetText)
 
     // Instruct the widget manager to update the widget
     appWidgetManager.updateAppWidget(appWidgetId, views)
@@ -30,6 +29,10 @@ class NewAppWidget extends AppWidgetProvider {
     appWidgetIds.foreach { id =>
       updateAppWidget(context, appWidgetManager, id)
     }
+  }
+
+  override def onReceive(context: Context, intent: Intent): Unit = {
+    Log.d(TAG, "onReceive")
   }
 
   override def onEnabled(context: Context): Unit = {
