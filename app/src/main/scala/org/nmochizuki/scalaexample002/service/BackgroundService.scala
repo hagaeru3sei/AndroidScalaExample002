@@ -52,4 +52,5 @@ object BackgroundService {
   class LocalBinder extends Binder {
     def service: BackgroundService = self.apply
   }
+
 }

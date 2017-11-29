@@ -7,14 +7,20 @@ import android.os.{Bundle, IBinder}
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
-import android.view.View
+import android.view.{LayoutInflater, View}
 import android.view.View.OnClickListener
-import android.widget.Button
+import android.widget.{Button, ProgressBar, TextView}
 import android.Manifest
+import android.support.design.widget.TabLayout
+import android.support.v4.app.FragmentActivity
+import android.support.v4.view.{PagerAdapter, ViewPager}
 import org.nmochizuki.scalaexample002.service.BackgroundService
 import org.nmochizuki.scalaexample002.service.BackgroundService.LocalBinder
 
-class MainActivity extends AppCompatActivity {
+import scala.concurrent._
+import ExecutionContext.Implicits.global
+
+class MainActivity extends FragmentActivity {
 
   val TAG = "MainActivity"
 
@@ -41,13 +47,48 @@ class MainActivity extends AppCompatActivity {
 
     requestPermissions()
 
+    val tabLayout = findViewById(R.id.tabs).asInstanceOf[TabLayout]
+    val viewPager = findViewById(R.id.pager).asInstanceOf[ViewPager]
+    val pagerAdapter = new AppPagerAdapter(getSupportFragmentManager, getApplicationContext)
+    viewPager.setAdapter(pagerAdapter)
+    tabLayout.setupWithViewPager(viewPager)
+    tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+      override def onTabSelected(tab: TabLayout.Tab): Unit = {
+        Log.d(TAG, "onTabSelected")
+
+      }
+
+      override def onTabUnselected(tab: TabLayout.Tab): Unit = {
+        Log.d(TAG, "onTabUnselected")
+
+      }
+
+      override def onTabReselected(tab: TabLayout.Tab): Unit = {
+        Log.d(TAG, "onTabReselected")
+
+      }
+    })
+
+    val inflater = LayoutInflater.from(this)
+    Tabs.values.foreach { t =>
+      val tab = tabLayout.getTabAt(t._1)
+      val view = inflater.inflate(R.layout.custom_tab, null)
+      val textView = view.findViewById(R.id.tab_title).asInstanceOf[TextView]
+      textView.setText(pagerAdapter.getPageTitle(t._1))
+      tab.setCustomView(view)
+    }
+
+    /*
     val playButton = findViewById(R.id.button_play).asInstanceOf[Button]
     playButton.setOnClickListener(new OnClickListener {
       override def onClick(view: View): Unit = {
         Log.d(TAG, "onClick")
+        Future {
+          updateProgressBar()
+        }
       }
     })
-
+    */
   }
 
   override def onStart(): Unit = {
@@ -55,6 +96,25 @@ class MainActivity extends AppCompatActivity {
     super.onStart()
     val intent = new Intent(this, classOf[BackgroundService])
     bindService(intent, connection, Context.BIND_AUTO_CREATE)
+  }
+
+  override def onResume(): Unit = {
+    Log.d(TAG, "onResume")
+    super.onResume()
+  }
+
+  override def onDestroy(): Unit = {
+    super.onDestroy()
+  }
+
+  private def updateProgressBar(progress: Int = 0) : Unit = {
+    val progressBar = findViewById(R.id.progress_bar).asInstanceOf[ProgressBar]
+    Log.d(TAG, s"progress: $progress")
+    if (progress <= 1000) {
+      progressBar.setProgress(progress + 10)
+      Thread.sleep(10)
+      updateProgressBar(progress + 10)
+    }
   }
 
   private def requestPermissions(): Unit = {
@@ -77,7 +137,8 @@ class MainActivity extends AppCompatActivity {
 
     val REQUEST_PERMISSION = 1
     val permissions: Array[String] = Array(
-      Manifest.permission.RECORD_AUDIO, Manifest.permission.WRITE_EXTERNAL_STORAGE
+      Manifest.permission.RECORD_AUDIO,
+      Manifest.permission.WRITE_EXTERNAL_STORAGE
     )
 
     override def onCreateDialog(savedInstanceState: Bundle): Dialog = {
