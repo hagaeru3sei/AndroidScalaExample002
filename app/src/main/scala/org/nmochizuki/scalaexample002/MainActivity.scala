@@ -7,20 +7,16 @@ import android.os.{Bundle, IBinder}
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
-import android.view.{LayoutInflater, View}
-import android.view.View.OnClickListener
-import android.widget.{Button, ProgressBar, TextView}
+import android.view.LayoutInflater
+import android.widget.TextView
 import android.Manifest
 import android.support.design.widget.TabLayout
-import android.support.v4.app.FragmentActivity
-import android.support.v4.view.{PagerAdapter, ViewPager}
+import android.support.v4.view.ViewPager
 import org.nmochizuki.scalaexample002.service.BackgroundService
 import org.nmochizuki.scalaexample002.service.BackgroundService.LocalBinder
 
-import scala.concurrent._
-import ExecutionContext.Implicits.global
 
-class MainActivity extends FragmentActivity {
+class MainActivity extends AppCompatActivity {
 
   val TAG = "MainActivity"
 
@@ -50,22 +46,20 @@ class MainActivity extends FragmentActivity {
     val tabLayout = findViewById(R.id.tabs).asInstanceOf[TabLayout]
     val viewPager = findViewById(R.id.pager).asInstanceOf[ViewPager]
     val pagerAdapter = new AppPagerAdapter(getSupportFragmentManager, getApplicationContext)
+
     viewPager.setAdapter(pagerAdapter)
     tabLayout.setupWithViewPager(viewPager)
     tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
       override def onTabSelected(tab: TabLayout.Tab): Unit = {
         Log.d(TAG, "onTabSelected")
-
       }
 
       override def onTabUnselected(tab: TabLayout.Tab): Unit = {
         Log.d(TAG, "onTabUnselected")
-
       }
 
       override def onTabReselected(tab: TabLayout.Tab): Unit = {
         Log.d(TAG, "onTabReselected")
-
       }
     })
 
@@ -78,17 +72,6 @@ class MainActivity extends FragmentActivity {
       tab.setCustomView(view)
     }
 
-    /*
-    val playButton = findViewById(R.id.button_play).asInstanceOf[Button]
-    playButton.setOnClickListener(new OnClickListener {
-      override def onClick(view: View): Unit = {
-        Log.d(TAG, "onClick")
-        Future {
-          updateProgressBar()
-        }
-      }
-    })
-    */
   }
 
   override def onStart(): Unit = {
@@ -105,15 +88,9 @@ class MainActivity extends FragmentActivity {
 
   override def onDestroy(): Unit = {
     super.onDestroy()
-  }
-
-  private def updateProgressBar(progress: Int = 0) : Unit = {
-    val progressBar = findViewById(R.id.progress_bar).asInstanceOf[ProgressBar]
-    Log.d(TAG, s"progress: $progress")
-    if (progress <= 1000) {
-      progressBar.setProgress(progress + 10)
-      Thread.sleep(10)
-      updateProgressBar(progress + 10)
+    if (isBound) {
+      unbindService(connection)
+      isBound = false
     }
   }
 
